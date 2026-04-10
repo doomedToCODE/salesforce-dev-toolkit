@@ -30,12 +30,16 @@ This project solves that problem by providing a **fully in-org alternative** —
 * Explore objects and fields
 * View metadata (type, length, required, etc.)
 * Inspect relationships
+<img width="1640" height="827" alt="image" src="https://github.com/user-attachments/assets/12f1b01e-324d-4df1-b8b5-a855a164dd45" />
+
 
 ### 📄 Record Viewer
 
 * Fetch and view single records
 * Edit and update records
 * Delete records
+  <img width="1633" height="875" alt="image" src="https://github.com/user-attachments/assets/bc18e98f-a6ea-409d-919b-5be63293a30e" />
+
 
 ### ✏️ Data Editor
 
@@ -43,6 +47,8 @@ This project solves that problem by providing a **fully in-org alternative** —
 * Bulk delete
 * Track changed records only
 * Export data to CSV
+<img width="1668" height="790" alt="image" src="https://github.com/user-attachments/assets/67acc5fb-79b4-4e39-9bb5-1dec604ee786" />
+
 
 ### ⚙️ Org Utilities
 
@@ -50,6 +56,7 @@ This project solves that problem by providing a **fully in-org alternative** —
 * Metadata summary
 * Clear Apex logs
 * Field usage analysis
+<img width="1677" height="783" alt="image" src="https://github.com/user-attachments/assets/12dc8526-896e-402f-8562-474e7801bcca" />
 
 ---
 
