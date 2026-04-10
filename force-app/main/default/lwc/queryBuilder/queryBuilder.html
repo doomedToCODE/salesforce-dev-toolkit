@@ -1,0 +1,98 @@
+<template>
+    <lightning-card title="Builder Mode" icon-name="utility:builder">
+        <div class="slds-p-around_medium">
+
+            <!-- Object Selector -->
+            <div class="slds-m-bottom_medium">
+                <lightning-combobox
+                    name="objectSelector"
+                    label="Select Object"
+                    placeholder="Search and select an SObject..."
+                    options={objectOptions}
+                    value={selectedObject}
+                    onchange={handleObjectSelect}
+                ></lightning-combobox>
+            </div>
+
+            <!-- Field Multi-Select (shown after object selected) -->
+            <template lwc:if={hasObject}>
+                <div class="slds-m-bottom_medium">
+                    <lightning-dual-listbox
+                        name="fieldSelector"
+                        label="Select Fields"
+                        source-label="Available Fields"
+                        selected-label="Selected Fields"
+                        options={fieldOptions}
+                        value={internalSelectedFields}
+                        onchange={handleFieldSelect}
+                    ></lightning-dual-listbox>
+                </div>
+
+                <!-- Filter Builder -->
+                <fieldset class="slds-box slds-m-bottom_medium">
+                    <legend class="slds-text-title_caps slds-p-around_x-small">Filters (WHERE clause)</legend>
+
+                    <template for:each={internalFilters} for:item="filter" for:index="idx">
+                        <div key={filter.id} class="slds-grid slds-gutters slds-m-bottom_small slds-grid_vertical-align-end">
+                            <div class="slds-col slds-size_4-of-12">
+                                <lightning-combobox
+                                    label="Field"
+                                    options={fieldOptions}
+                                    value={filter.field}
+                                    data-index={idx}
+                                    data-prop="field"
+                                    onchange={handleFilterChange}
+                                ></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_3-of-12">
+                                <lightning-combobox
+                                    label="Operator"
+                                    options={operatorOptions}
+                                    value={filter.operator}
+                                    data-index={idx}
+                                    data-prop="operator"
+                                    onchange={handleFilterChange}
+                                ></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_4-of-12">
+                                <lightning-input
+                                    label="Value"
+                                    value={filter.value}
+                                    data-index={idx}
+                                    data-prop="value"
+                                    onchange={handleFilterChange}
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-12">
+                                <lightning-button-icon
+                                    icon-name="utility:delete"
+                                    variant="bare"
+                                    alternative-text="Remove filter"
+                                    data-index={idx}
+                                    onclick={handleRemoveFilter}
+                                ></lightning-button-icon>
+                            </div>
+                        </div>
+                    </template>
+
+                    <lightning-button
+                        label="Add Filter"
+                        variant="neutral"
+                        icon-name="utility:add"
+                        onclick={handleAddFilter}
+                        class="slds-m-top_small"
+                    ></lightning-button>
+                </fieldset>
+
+                <!-- Generate SOQL -->
+                <lightning-button
+                    label="Generate SOQL"
+                    variant="brand"
+                    icon-name="utility:apex"
+                    onclick={handleGenerate}
+                ></lightning-button>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

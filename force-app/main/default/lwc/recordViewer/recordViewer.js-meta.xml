@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Record Viewer</masterLabel>
+    <description>View and edit individual records via REST API. Supports inline editing and record creation.</description>
+</LightningComponentBundle>

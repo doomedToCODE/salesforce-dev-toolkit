@@ -1,0 +1,337 @@
+<template>
+    <div class="slds-grid slds-grid_vertical">
+
+        <!-- Utility Tab Navigation -->
+        <div class="slds-m-bottom_medium">
+            <lightning-button-group>
+                <lightning-button
+                    label="API Limits"
+                    variant={limitsVariant}
+                    onclick={handleLimitsTab}
+                    icon-name="utility:metrics"
+                ></lightning-button>
+                <lightning-button
+                    label="Org Metadata"
+                    variant={metadataVariant}
+                    onclick={handleMetadataTab}
+                    icon-name="utility:summary"
+                ></lightning-button>
+                <lightning-button
+                    label="Clear Apex Logs"
+                    variant={clearLogsVariant}
+                    onclick={handleClearLogsTab}
+                    icon-name="utility:delete"
+                ></lightning-button>
+                <lightning-button
+                    label="Field Usage"
+                    variant={fieldUsageVariant}
+                    onclick={handleFieldUsageTab}
+                    icon-name="utility:chart"
+                ></lightning-button>
+            </lightning-button-group>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- API Limits Monitor                         -->
+        <!-- ═══════════════════════════════════════════ -->
+        <template lwc:if={isLimits}>
+            <lightning-card title="API Limits Monitor" icon-name="utility:metrics">
+                <div slot="actions">
+                    <lightning-button
+                        label="Refresh"
+                        variant="brand"
+                        icon-name="utility:refresh"
+                        onclick={handleRefreshLimits}
+                        disabled={limitsLoading}
+                    ></lightning-button>
+                </div>
+                <div class="slds-p-around_medium">
+
+                    <template lwc:if={limitsLoading}>
+                        <div class="slds-is-relative slds-p-around_large">
+                            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template lwc:if={limitsError}>
+                        <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                            <lightning-icon icon-name="utility:error" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <span>{limitsError}</span>
+                        </div>
+                    </template>
+
+                    <template lwc:if={hasLimits}>
+                        <lightning-datatable
+                            key-field="name"
+                            data={limitsData}
+                            columns={limitsColumns}
+                            hide-checkbox-column
+                            sorted-by="displayName"
+                            default-sort-direction="asc"
+                        ></lightning-datatable>
+                    </template>
+
+                    <template lwc:else>
+                        <div class="slds-align_absolute-center slds-p-around_large">
+                            <div class="slds-text-align_center">
+                                <lightning-icon icon-name="utility:metrics" size="large" class="slds-m-bottom_small"></lightning-icon>
+                                <p class="slds-text-heading_small slds-text-color_weak">Click Refresh to load current API limits.</p>
+                            </div>
+                        </div>
+                    </template>
+
+                </div>
+            </lightning-card>
+        </template>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- Org Metadata Summary                       -->
+        <!-- ═══════════════════════════════════════════ -->
+        <template lwc:if={isMetadata}>
+            <lightning-card title="Org Metadata Summary" icon-name="utility:summary">
+                <div slot="actions">
+                    <lightning-button
+                        label="Refresh"
+                        variant="brand"
+                        icon-name="utility:refresh"
+                        onclick={handleRefreshMetadata}
+                        disabled={metadataLoading}
+                    ></lightning-button>
+                </div>
+                <div class="slds-p-around_medium">
+
+                    <template lwc:if={metadataLoading}>
+                        <div class="slds-is-relative slds-p-around_large">
+                            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template lwc:if={metadataError}>
+                        <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                            <lightning-icon icon-name="utility:error" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <span>{metadataError}</span>
+                        </div>
+                    </template>
+
+                    <template lwc:if={hasMetadata}>
+                        <!-- Counts Grid -->
+                        <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_medium">
+                            <div class="slds-col slds-size_1-of-3 slds-p-around_small">
+                                <div class="slds-box slds-text-align_center slds-theme_shade">
+                                    <p class="slds-text-heading_large">{metadata.customObjectCount}</p>
+                                    <p class="slds-text-body_small">Custom Objects</p>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-p-around_small">
+                                <div class="slds-box slds-text-align_center slds-theme_shade">
+                                    <p class="slds-text-heading_large">{metadata.apexClassCount}</p>
+                                    <p class="slds-text-body_small">Apex Classes</p>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-p-around_small">
+                                <div class="slds-box slds-text-align_center slds-theme_shade">
+                                    <p class="slds-text-heading_large">{metadata.apexTriggerCount}</p>
+                                    <p class="slds-text-body_small">Apex Triggers</p>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-p-around_small">
+                                <div class="slds-box slds-text-align_center slds-theme_shade">
+                                    <p class="slds-text-heading_large">{metadata.lwcCount}</p>
+                                    <p class="slds-text-body_small">LWC Bundles</p>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-p-around_small">
+                                <div class="slds-box slds-text-align_center slds-theme_shade">
+                                    <p class="slds-text-heading_large">{metadata.auraCount}</p>
+                                    <p class="slds-text-body_small">Aura Bundles</p>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-p-around_small">
+                                <div class="slds-box slds-text-align_center slds-theme_shade">
+                                    <p class="slds-text-heading_large">{metadata.flowCount}</p>
+                                    <p class="slds-text-body_small">Active Flows</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Installed Packages -->
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">
+                            Installed Packages ({metadata.installedPackageCount})
+                        </h3>
+                        <template lwc:if={hasPackages}>
+                            <lightning-datatable
+                                key-field="name"
+                                data={metadata.installedPackages}
+                                columns={packageColumns}
+                                hide-checkbox-column
+                            ></lightning-datatable>
+                        </template>
+                        <template lwc:else>
+                            <p class="slds-text-body_small slds-text-color_weak">No managed packages installed.</p>
+                        </template>
+                    </template>
+
+                    <template lwc:else>
+                        <div class="slds-align_absolute-center slds-p-around_large">
+                            <div class="slds-text-align_center">
+                                <lightning-icon icon-name="utility:summary" size="large" class="slds-m-bottom_small"></lightning-icon>
+                                <p class="slds-text-heading_small slds-text-color_weak">Click Refresh to load org metadata summary.</p>
+                            </div>
+                        </div>
+                    </template>
+
+                </div>
+            </lightning-card>
+        </template>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- Clear Apex Logs                            -->
+        <!-- ═══════════════════════════════════════════ -->
+        <template lwc:if={isClearLogs}>
+            <lightning-card title="Clear Apex Debug Logs" icon-name="utility:delete">
+                <div class="slds-p-around_medium">
+
+                    <div class="slds-box slds-m-bottom_medium slds-theme_shade">
+                        <p class="slds-text-body_regular">
+                            This will delete <strong>all</strong> debug logs for your user via the Tooling API.
+                            Logs from other users are not affected.
+                        </p>
+                    </div>
+
+                    <lightning-button
+                        label="Clear My Debug Logs"
+                        variant="destructive"
+                        icon-name="utility:delete"
+                        onclick={handleClearLogsClick}
+                        disabled={logsClearing}
+                    ></lightning-button>
+
+                    <template lwc:if={logsClearing}>
+                        <div class="slds-is-relative slds-p-around_large">
+                            <lightning-spinner alternative-text="Clearing..." size="medium"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template lwc:if={logsError}>
+                        <div class="slds-notify slds-notify_alert slds-alert_error slds-m-top_medium" role="alert">
+                            <lightning-icon icon-name="utility:error" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <span>{logsError}</span>
+                        </div>
+                    </template>
+
+                    <template lwc:if={logsMessage}>
+                        <div class="slds-notify slds-notify_alert slds-alert_success slds-m-top_medium" role="alert">
+                            <lightning-icon icon-name="utility:success" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <span>{logsMessage}</span>
+                        </div>
+                    </template>
+
+                </div>
+            </lightning-card>
+
+            <!-- Confirm Modal -->
+            <template lwc:if={showLogConfirm}>
+                <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <div class="slds-modal__header">
+                            <h2 class="slds-text-heading_medium">Confirm Clear Logs</h2>
+                        </div>
+                        <div class="slds-modal__content slds-p-around_medium">
+                            <p>Are you sure you want to delete all your debug logs? This cannot be undone.</p>
+                        </div>
+                        <div class="slds-modal__footer">
+                            <lightning-button label="Cancel" onclick={handleCancelClearLogs}></lightning-button>
+                            <lightning-button label="Delete Logs" variant="destructive" onclick={handleConfirmClearLogs} class="slds-m-left_x-small"></lightning-button>
+                        </div>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </template>
+        </template>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- Field Usage Checker                        -->
+        <!-- ═══════════════════════════════════════════ -->
+        <template lwc:if={isFieldUsage}>
+            <lightning-card title="Field Usage Checker" icon-name="utility:chart">
+                <div class="slds-p-around_medium">
+
+                    <div class="slds-box slds-m-bottom_medium slds-theme_shade">
+                        <p class="slds-text-body_regular">
+                            Select an object and fields to check what percentage of records have each field populated.
+                        </p>
+                    </div>
+
+                    <!-- Object + Field Selection -->
+                    <div class="slds-grid slds-gutters slds-m-bottom_medium slds-grid_vertical-align-end">
+                        <div class="slds-col slds-size_4-of-12">
+                            <lightning-combobox
+                                name="fieldUsageObject"
+                                label="Object"
+                                placeholder="Select an SObject..."
+                                options={objectOptions}
+                                value={fieldUsageObject}
+                                onchange={handleFieldUsageObjectSelect}
+                            ></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12">
+                            <template lwc:if={hasFieldUsageObject}>
+                                <lightning-dual-listbox
+                                    name="fieldUsageFields"
+                                    label="Fields to Check"
+                                    source-label="Available"
+                                    selected-label="Selected"
+                                    options={fieldOptions}
+                                    value={fieldUsageFields}
+                                    onchange={handleFieldUsageFieldSelect}
+                                    size="5"
+                                ></lightning-dual-listbox>
+                            </template>
+                        </div>
+                        <div class="slds-col slds-size_2-of-12">
+                            <lightning-button
+                                label="Check Usage"
+                                variant="brand"
+                                icon-name="utility:chart"
+                                onclick={handleCheckFieldUsage}
+                                disabled={isFieldUsageCheckDisabled}
+                            ></lightning-button>
+                        </div>
+                    </div>
+
+                    <template lwc:if={fieldUsageLoading}>
+                        <div class="slds-is-relative slds-p-around_large">
+                            <lightning-spinner alternative-text="Checking..." size="medium"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template lwc:if={fieldUsageError}>
+                        <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                            <lightning-icon icon-name="utility:error" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <span>{fieldUsageError}</span>
+                        </div>
+                    </template>
+
+                    <template lwc:if={hasFieldUsageResult}>
+                        <div class="slds-m-bottom_small">
+                            <span class="slds-badge slds-badge_lightest">
+                                Total Records: {fieldUsageResult.totalRecords}
+                            </span>
+                        </div>
+                        <lightning-datatable
+                            key-field="fieldName"
+                            data={fieldUsageResult.fields}
+                            columns={fieldUsageColumns}
+                            hide-checkbox-column
+                            show-row-number-column
+                            sorted-by="fieldName"
+                            default-sort-direction="asc"
+                        ></lightning-datatable>
+                    </template>
+
+                </div>
+            </lightning-card>
+        </template>
+
+    </div>
+</template>

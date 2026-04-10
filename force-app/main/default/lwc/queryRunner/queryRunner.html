@@ -1,0 +1,92 @@
+<template>
+    <!-- Mode Toggle -->
+    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_medium">
+        <div class="slds-col">
+            <lightning-button-group>
+                <lightning-button
+                    label="Builder Mode"
+                    variant={builderVariant}
+                    onclick={handleBuilderMode}
+                    icon-name="utility:builder"
+                ></lightning-button>
+                <lightning-button
+                    label="Query Mode"
+                    variant={queryVariant}
+                    onclick={handleQueryMode}
+                    icon-name="utility:apex"
+                ></lightning-button>
+            </lightning-button-group>
+        </div>
+        <div class="slds-col slds-text-align_right">
+            <lightning-button
+                label="Run Query"
+                variant="brand"
+                onclick={handleRunQuery}
+                disabled={isRunDisabled}
+                icon-name="utility:play"
+            ></lightning-button>
+        </div>
+    </div>
+
+    <!-- Builder Mode -->
+    <template lwc:if={isBuilderMode}>
+        <c-query-builder
+            selected-object={selectedObject}
+            selected-fields={selectedFields}
+            filters={filters}
+            onobjectchange={handleObjectChange}
+            onfieldschange={handleFieldsChange}
+            onfilterschange={handleFiltersChange}
+            ongeneratequery={handleGenerateQuery}
+        ></c-query-builder>
+    </template>
+
+    <!-- Query Mode -->
+    <template lwc:if={isQueryMode}>
+        <c-query-editor
+            query-string={queryString}
+            onquerychange={handleQueryChange}
+            onrunquery={handleRunQuery}
+        ></c-query-editor>
+    </template>
+
+    <!-- Error Display -->
+    <template lwc:if={error}>
+        <div class="slds-m-top_medium">
+            <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                <lightning-icon icon-name="utility:error" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                <span>{error}</span>
+            </div>
+        </div>
+    </template>
+
+    <!-- Results -->
+    <div class="slds-m-top_medium">
+        <c-query-results
+            records={data}
+            columns={columns}
+            total-rows={totalRows}
+            is-loading={isLoading}
+            error={error}
+        ></c-query-results>
+
+        <!-- Pagination controls -->
+        <template lwc:if={hasMoreRecords}>
+            <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+                <div class="slds-text-body_small slds-text-color_weak slds-m-right_medium slds-grid slds-grid_vertical-align-center">
+                    {paginationLabel}
+                </div>
+                <lightning-button
+                    label="Load More Records"
+                    variant="neutral"
+                    icon-name="utility:download"
+                    onclick={handleLoadMore}
+                    disabled={isLoadingMore}
+                ></lightning-button>
+                <template lwc:if={isLoadingMore}>
+                    <lightning-spinner alternative-text="Loading more..." size="small" class="slds-m-left_small"></lightning-spinner>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>
