@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>62.0</apiVersion>
-    <isExposed>false</isExposed>
-    <masterLabel>Data Editor</masterLabel>
-    <description>Inline grid editor with bulk update, bulk delete, and CSV export capabilities via Composite SObject Collections API.</description>
-</LightningComponentBundle>
