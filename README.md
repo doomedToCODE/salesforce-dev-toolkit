@@ -20,6 +20,10 @@ This project solves that problem by providing a **fully in-org alternative** —
 * Builder mode (no-code query generation)
 * Raw query editor with field suggestions
 * Pagination support
+  <img width="1859" height="880" alt="image" src="https://github.com/user-attachments/assets/b8779035-132d-41b3-85e2-300fb6390a1d" />
+  <img width="1661" height="883" alt="image" src="https://github.com/user-attachments/assets/8f8fde59-e5bb-4b7e-acd8-cda3afec38b5" />
+
+
 
 ### 🧠 Object Explorer
 
