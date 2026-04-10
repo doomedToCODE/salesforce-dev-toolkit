@@ -1,0 +1,173 @@
+<template>
+    <div class="slds-grid slds-grid_vertical">
+
+        <!-- Object + Record ID Input -->
+        <div class="slds-grid slds-gutters slds-m-bottom_medium slds-grid_vertical-align-end">
+            <div class="slds-col slds-size_5-of-12">
+                <lightning-combobox
+                    name="objectSelector"
+                    label="Object"
+                    placeholder="Select an SObject..."
+                    options={objectOptions}
+                    value={selectedObject}
+                    onchange={handleObjectSelect}
+                ></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_5-of-12">
+                <lightning-input
+                    label="Record ID"
+                    placeholder="Enter a 15 or 18-character Record ID"
+                    value={recordId}
+                    onchange={handleRecordIdChange}
+                ></lightning-input>
+            </div>
+            <div class="slds-col slds-size_2-of-12">
+                <lightning-button
+                    label="Fetch Record"
+                    variant="brand"
+                    icon-name="utility:search"
+                    onclick={handleFetchRecord}
+                    disabled={isFetchDisabled}
+                ></lightning-button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <template lwc:if={isLoading}>
+            <div class="slds-is-relative slds-p-around_large">
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error -->
+        <template lwc:if={error}>
+            <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                <lightning-icon icon-name="utility:error" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                <span>{error}</span>
+            </div>
+        </template>
+
+        <!-- Success -->
+        <template lwc:if={successMessage}>
+            <div class="slds-notify slds-notify_alert slds-alert_success slds-m-bottom_medium" role="alert">
+                <lightning-icon icon-name="utility:success" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                <span>{successMessage}</span>
+            </div>
+        </template>
+
+        <!-- Record Detail -->
+        <template lwc:if={hasRecord}>
+
+            <!-- Action Bar -->
+            <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium">
+                <div>
+                    <h2 class="slds-text-heading_medium">{recordTitle}</h2>
+                    <p class="slds-text-body_small slds-text-color_weak">{selectedObject} · {recordId}</p>
+                </div>
+                <div>
+                    <lightning-button-group>
+                        <lightning-button
+                            label={editButtonLabel}
+                            variant={editButtonVariant}
+                            icon-name={editButtonIcon}
+                            onclick={handleToggleEdit}
+                        ></lightning-button>
+                        <template lwc:if={isEditing}>
+                            <lightning-button
+                                label="Save"
+                                variant="brand"
+                                icon-name="utility:save"
+                                onclick={handleSave}
+                                disabled={isSaving}
+                            ></lightning-button>
+                        </template>
+                        <lightning-button
+                            label="Delete"
+                            variant="destructive-text"
+                            icon-name="utility:delete"
+                            onclick={handleDelete}
+                            disabled={isSaving}
+                        ></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </div>
+
+            <!-- Saving spinner -->
+            <template lwc:if={isSaving}>
+                <div class="slds-is-relative slds-p-around_small">
+                    <lightning-spinner alternative-text="Saving..." size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- Field List -->
+            <div class="slds-box">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col" style="width: 30%;"><div class="slds-truncate">Field</div></th>
+                            <th scope="col"><div class="slds-truncate">Value</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={displayFields} for:item="field">
+                            <tr key={field.fieldName}>
+                                <td>
+                                    <div class="slds-truncate" title={field.fieldName}>
+                                        <strong>{field.label}</strong>
+                                        <br/>
+                                        <span class="slds-text-body_small slds-text-color_weak">{field.fieldName}</span>
+                                        <template lwc:if={field.isModified}>
+                                            <lightning-badge label="Modified" class="slds-m-left_xx-small"></lightning-badge>
+                                        </template>
+                                    </div>
+                                </td>
+                                <td>
+                                    <!-- View mode -->
+                                    <template lwc:if={field.isEditable}>
+
+                                        <!-- Boolean editor -->
+                                        <template lwc:if={field.isBoolean}>
+                                            <lightning-input
+                                                type="checkbox"
+                                                checked={field.booleanChecked}
+                                                data-field={field.fieldName}
+                                                onchange={handleBooleanChange}
+                                            ></lightning-input>
+                                        </template>
+
+                                        <!-- Picklist editor -->
+                                        <template lwc:elseif={field.isPicklist}>
+                                            <lightning-combobox
+                                                options={field.picklistOptions}
+                                                value={field.editValue}
+                                                data-field={field.fieldName}
+                                                onchange={handleFieldChange}
+                                            ></lightning-combobox>
+                                        </template>
+
+                                        <!-- Text / default editor -->
+                                        <template lwc:else>
+                                            <lightning-input
+                                                value={field.editValue}
+                                                data-field={field.fieldName}
+                                                onchange={handleFieldChange}
+                                            ></lightning-input>
+                                        </template>
+
+                                    </template>
+
+                                    <!-- Read-only -->
+                                    <template lwc:else>
+                                        <span class="slds-truncate">{field.value}</span>
+                                    </template>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+        </template>
+
+    </div>
+</template>

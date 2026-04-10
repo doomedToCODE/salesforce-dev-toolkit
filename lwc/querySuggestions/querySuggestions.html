@@ -1,0 +1,25 @@
+<template>
+    <!-- V2 Scope: Suggestion dropdown for field/object auto-complete -->
+    <template lwc:if={hasSuggestions}>
+        <div class="slds-dropdown_container">
+            <div class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid" role="listbox">
+                <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                    <template for:each={suggestions} for:item="suggestion">
+                        <li key={suggestion.value} role="presentation" class="slds-listbox__item">
+                            <div
+                                class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small"
+                                role="option"
+                                data-value={suggestion.value}
+                                onclick={handleSelect}
+                            >
+                                <span class="slds-media__body">
+                                    <span class="slds-truncate" title={suggestion.label}>{suggestion.label}</span>
+                                </span>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+    </template>
+</template>

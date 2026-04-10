@@ -1,0 +1,110 @@
+<template>
+    <div class="slds-grid slds-grid_vertical">
+
+        <!-- Object Selector -->
+        <div class="slds-m-bottom_medium">
+            <lightning-combobox
+                name="objectSelector"
+                label="Select Object"
+                placeholder="Search and select an SObject..."
+                options={objectOptions}
+                value={selectedObject}
+                onchange={handleObjectSelect}
+            ></lightning-combobox>
+        </div>
+
+        <!-- Loading -->
+        <template lwc:if={isLoading}>
+            <div class="slds-is-relative slds-p-around_large">
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error -->
+        <template lwc:if={error}>
+            <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                <lightning-icon icon-name="utility:error" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                <span>{error}</span>
+            </div>
+        </template>
+
+        <!-- Object Detail -->
+        <template lwc:if={hasObject}>
+
+            <!-- Summary Header -->
+            <div class="slds-box slds-m-bottom_medium slds-theme_shade">
+                <div class="slds-grid slds-grid_align-spread">
+                    <div>
+                        <h2 class="slds-text-heading_medium">{objectDescribe.label}</h2>
+                        <p class="slds-text-body_small slds-text-color_weak">
+                            API Name: <strong>{objectDescribe.name}</strong>
+                            <template lwc:if={objectDescribe.keyPrefix}>
+                                &nbsp;·&nbsp;Key Prefix: <strong>{objectDescribe.keyPrefix}</strong>
+                            </template>
+                        </p>
+                    </div>
+                    <div class="slds-text-align_right">
+                        <p class="slds-text-body_small slds-text-color_weak">{objectSummary}</p>
+                        <p class="slds-text-body_small">
+                            <strong>{fieldCount}</strong> fields &nbsp;·&nbsp;
+                            <strong>{relationshipCount}</strong> child relationships
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Toggle -->
+            <div class="slds-m-bottom_medium">
+                <lightning-button-group>
+                    <lightning-button
+                        label="Fields"
+                        variant={fieldsTabVariant}
+                        onclick={handleFieldsTab}
+                        icon-name="utility:text"
+                    ></lightning-button>
+                    <lightning-button
+                        label="Child Relationships"
+                        variant={relationshipsTabVariant}
+                        onclick={handleRelationshipsTab}
+                        icon-name="utility:hierarchy"
+                    ></lightning-button>
+                </lightning-button-group>
+            </div>
+
+            <!-- Fields Tab -->
+            <template lwc:if={isFieldsTab}>
+                <div class="slds-m-bottom_small">
+                    <lightning-input
+                        type="search"
+                        label="Filter Fields"
+                        placeholder="Search by API name or label..."
+                        value={fieldSearch}
+                        onchange={handleFieldSearch}
+                    ></lightning-input>
+                </div>
+                <lightning-datatable
+                    key-field="name"
+                    data={filteredFields}
+                    columns={fieldColumns}
+                    hide-checkbox-column
+                    show-row-number-column
+                    sorted-by="name"
+                    default-sort-direction="asc"
+                ></lightning-datatable>
+            </template>
+
+            <!-- Relationships Tab -->
+            <template lwc:if={isRelationshipsTab}>
+                <lightning-datatable
+                    key-field="relationshipName"
+                    data={childRelationships}
+                    columns={relationshipColumns}
+                    hide-checkbox-column
+                    show-row-number-column
+                ></lightning-datatable>
+            </template>
+
+        </template>
+
+    </div>
+</template>

@@ -1,0 +1,93 @@
+<template>
+    <lightning-card title="Query Mode" icon-name="utility:apex">
+        <div class="slds-p-around_medium">
+
+            <!-- SOQL Textarea -->
+            <div class="slds-form-element slds-m-bottom_medium">
+                <label class="slds-form-element__label" for="soql-input">SOQL Query</label>
+                <div class="slds-form-element__control">
+                    <textarea
+                        id="soql-input"
+                        data-id="soqlTextarea"
+                        class="slds-textarea"
+                        rows="8"
+                        placeholder="SELECT Id, Name FROM Account LIMIT 10"
+                        oninput={handleInput}
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Field Suggestions Panel -->
+            <template lwc:if={hasSuggestions}>
+                <div class="suggestion-panel slds-box slds-m-bottom_medium">
+
+                    <!-- Panel Header -->
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_x-small">
+                        <div class="slds-col">
+                            <span class="slds-text-title_caps slds-text-color_weak">{fieldCountLabel}</span>
+                        </div>
+                        <div class="slds-col slds-grid slds-grid_vertical-align-center">
+                            <div class="slds-form-element slds-m-right_small" style="width: 14rem;">
+                                <input
+                                    type="search"
+                                    class="slds-input slds-input_small"
+                                    placeholder="Filter fields..."
+                                    value={fieldSearch}
+                                    oninput={handleFieldSearch}
+                                />
+                            </div>
+                            <lightning-button
+                                label="Add All Visible"
+                                variant="neutral"
+                                icon-name="utility:add"
+                                onclick={handleInsertAllFields}
+                                class="slds-shrink-none"
+                            ></lightning-button>
+                        </div>
+                    </div>
+
+                    <!-- Field Pills -->
+                    <div class="field-pill-container">
+                        <template for:each={filteredFields} for:item="field">
+                            <span
+                                key={field.apiName}
+                                class={field.pillClass}
+                                data-field={field.apiName}
+                                onclick={handleFieldClick}
+                                title={field.label}
+                            >
+                                <span class="field-pill__name">{field.apiName}</span>
+                                <span class="field-pill__type slds-text-color_weak">{field.type}</span>
+                                <lightning-button-icon
+                                    icon-name="utility:copy"
+                                    variant="bare"
+                                    size="x-small"
+                                    alternative-text="Copy field name"
+                                    data-field={field.apiName}
+                                    onclick={handleCopyField}
+                                    class="field-pill__copy"
+                                ></lightning-button-icon>
+                            </span>
+                        </template>
+                    </div>
+
+                </div>
+            </template>
+
+            <!-- Inline hint -->
+            <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
+                Only SELECT queries are supported. A default LIMIT of 2000 is applied if omitted. Use "Load More" to paginate through large result sets.
+            </p>
+
+            <!-- Run from editor shortcut -->
+            <lightning-button
+                label="Run Query"
+                variant="brand"
+                icon-name="utility:play"
+                onclick={handleRun}
+            ></lightning-button>
+
+        </div>
+    </lightning-card>
+</template>
