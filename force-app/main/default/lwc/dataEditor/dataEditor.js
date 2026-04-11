@@ -400,36 +400,74 @@ export default class DataEditor extends LightningElement {
     handleExportCsv() {
         if (!this.hasData) return;
 
-        // Get field names from columns (excluding row number etc.)
-        const fieldNames = this.columns.map(col => col.fieldName);
-        const headers = fieldNames.join(',');
+        try {
+            const fieldNames = this.columns
+                .map(col => col.fieldName)
+                .filter(fieldName => !!fieldName);
 
+            if (fieldNames.length === 0) {
+                this.error = 'No columns available to export.';
+                return;
+            }
+
+            const csvContent = this._buildCsvContent(fieldNames);
+            this._downloadCsv(csvContent);
+            this.error = '';
+        } catch (error) {
+            this.error = error?.message || 'CSV export failed.';
+        }
+    }
+
+    _buildCsvContent(fieldNames) {
+        const headers = fieldNames
+            .map(field => {
+                const column = this.columns.find(col => col.fieldName === field);
+                return this._escapeCsvValue(column?.label || field);
+            })
+            .join(',');
         const rows = this.data.map(row => {
-            return fieldNames.map(field => {
-                let val = row[field];
-                if (val === null || val === undefined) {
-                    return '';
-                }
-                val = String(val);
-                // Escape CSV: wrap in quotes if contains comma, quote, or newline
-                if (val.includes(',') || val.includes('"') || val.includes('\n')) {
-                    val = '"' + val.replace(/"/g, '""') + '"';
-                }
-                return val;
-            }).join(',');
+            return fieldNames
+                .map(field => this._escapeCsvValue(row[field]))
+                .join(',');
         });
 
-        const csvContent = headers + '\n' + rows.join('\n');
+        return [headers, ...rows].join('\r\n');
+    }
 
-        // Create and download file
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = this.exportFileName;
-        link.click();
+    _escapeCsvValue(value) {
+        if (value === null || value === undefined) {
+            return '';
+        }
 
-        // Cleanup
-        setTimeout(() => URL.revokeObjectURL(link.href), 100);
+        const stringValue = String(value);
+        if (
+            stringValue.includes(',') ||
+            stringValue.includes('"') ||
+            stringValue.includes('\n') ||
+            stringValue.includes('\r')
+        ) {
+            return '"' + stringValue.replace(/"/g, '""') + '"';
+        }
+
+        return stringValue;
+    }
+
+    _downloadCsv(csvContent) {
+        const fileName = this.exportFileName;
+        const downloadElement = document.createElement('a');
+
+        downloadElement.href = 'data:text/csv;charset=utf-8,' + encodeURI('\uFEFF' + csvContent);
+        downloadElement.target = '_self';
+        downloadElement.download = fileName;
+        downloadElement.style.display = 'none';
+
+        document.body.appendChild(downloadElement);
+
+        try {
+            downloadElement.click();
+        } finally {
+            document.body.removeChild(downloadElement);
+        }
     }
 
     // ─── Utility ────────────────────────────────────
